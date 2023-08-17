@@ -65,8 +65,10 @@ class FeatureExtractor(object):
         pixel_std=[0.229, 0.224, 0.225],
         pixel_norm=True,
         device='cuda',
-        verbose=True
+        verbose=True,
+        half=False
     ):
+        self.half = half
         # Build model
         model = build_model(
             model_name,
@@ -102,6 +104,8 @@ class FeatureExtractor(object):
 
         # Class attributes
         self.model = model
+        if self.half:
+            self.model.half()
         self.preprocess = preprocess
         self.to_pil = to_pil
         self.device = device
@@ -146,6 +150,8 @@ class FeatureExtractor(object):
         else:
             raise NotImplementedError
 
+        if self.half:
+            images = images.to(torch.float16)
         with torch.no_grad():
             features = self.model(images)
 
